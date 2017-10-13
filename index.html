@@ -1,47 +1,61 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<style>
-			@font-face {
-				font-family: f8;
-				src : url(fond/Martel/Martel-Regular.ttf);
+		<script src="third-party/bezierjs/bezier.js"></script> 
+		 <script src="third-party/opentype.js/dist/opentype.js"></script> 
+		  <script>
+			var ctx;
+		  
+			function todo() {
+				var fileselc = document.getElementById('fileon');
+				ctx = document.getElementById("cnv").getContext("2d");
+				fileselc.addEventListener('change', function(e) {
+					var file = e.target.files[0];
+					var reader = new FileReader();
+					reader.onload = function(e) {
+						hustle(e.target.result);
+					};
+					reader.readAsArrayBuffer(file);
+				});
 			}
-			h1 span {
-				font-family: f8;
-				height: 200px;
-				position: absolute;
-				width: 20px;
-				left: 0;
-				top: 0;
-				transform-origin: bottom center;
+		  
+			/*M127,260 C147,120 325,75 401,99 path over this <--*/
+			function hustle(fontbuf) {
+				var martel = null;
+				var path = new Bezier(127,260,147,120,325,75,401,99);
+				martel = opentype.parse(fontbuf);
+				bustling(martel,path,"Gutenberg!");
 			}
 			
-			.char1 { transform: rotate(6deg); }
-			.char2 { transform: rotate(12deg); }
-			.char3 { transform: rotate(18deg); }
-			.char4 { transform: rotate(24deg); }
-			.char5 { transform: rotate(30deg); }
-			.char6 { transform: rotate(36deg); }
-			.char7 { transform: rotate(42deg); }
-			.char8 { transform: rotate(48deg); }
-			.char9 { transform: rotate(54deg); }
-			.char10 { transform: rotate(60deg); }
-			.char11 { transform: rotate(66deg); }
+			function bustling(fond,path,rng) {
+				var glyfs = fond.stringToGlyphs(rng);
+				var curT = 0;
+				for(var i = 0;i<glyfs.length;i++) {
+					gwidth = glyfs[i].getAdvancedWidth();
+					var pon = getPointFromHere(path,curT,gwidth);
+					var coord = path.get(pon);
+					ctx.beginPath();
+					circle.moveTo(coord[0], coord[1]);
+					circle.arc(coord[0], coord[1], 15, 0, 2 * Math.PI);
+					ctx.fill();
+				}
+			}
+			
+			function getPointFromHere(path,from,dist) {
+				var i = from;
+				while(path.split(from,i).length() != dist) {
+					i += 0.01;
+				}
+				return i;
+			}
+		  </script>
+		<style>
 		</style>
 	</head>
-	<body>
-		<h1>
-		  <span class="char1">E</span>
-		  <span class="char2">s</span>
-		  <span class="char3">t</span>
-		  <span class="char4">a</span>
-		  <span class="char5">b</span>
-		  <span class="char6">l</span>
-		  <span class="char7">i</span>
-		  <span class="char8">s</span>
-		  <span class="char9">h</span>
-		  <span class="char10">e</span>
-		  <span class="char11">d</span>
-		</h1>
+	<body onload="todo()">
+		<input type="file" id="fileon"></input>
+		<div>
+			<canvas id="cnv" width="500px" height="500px"> </canvas>
+		</div>
 	</body>
 </html>
